@@ -123,4 +123,22 @@ public class PlayerController : MonoBehaviour
             rb.AddForce(pushDir * pushForce, ForceMode.Impulse);
         }
     }
+
+    private void OnDrawGizmos()
+    {
+        if (controller == null)
+        {
+            return;
+        }
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawRay(transform.position + Vector3.up, transform.forward * 2f);
+
+        Gizmos.color = verticalVelocity < 0 ? Color.green : Color.magenta;
+        Gizmos.DrawLine(transform.position, transform.position + Vector3.up * verticalVelocity);
+    }
+
+
+
+
 }
