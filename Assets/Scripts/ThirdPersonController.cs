@@ -1,8 +1,4 @@
-using NUnit.Framework.Constraints;
-using System;
 using Unity.Cinemachine;
-using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,8 +12,7 @@ public class ThirdPersonController : MonoBehaviour
 
     public float moveSpeed = 20f;
     public float runMultiplier = 2f;
-    public float rotationSpeed = 20f;
-
+    public float rotationSpeed = 200f;
 
     public float gravity = -9.81f;
     public float verticalVelocity = 0f;
@@ -27,7 +22,7 @@ public class ThirdPersonController : MonoBehaviour
     private bool IsDashing;
     public float dashTimer = 0.2f;
     public float dashDuration = 0.2f;
-    public float dashForce = 10;
+    public float dashForce = 40;
 
     private bool isRunning;
 
@@ -51,59 +46,45 @@ public class ThirdPersonController : MonoBehaviour
         inputs.Player.Sprint.performed += OnDash;
 
         inputs.Player.Sprint.started += ctx => isRunning = true;
-        inputs.Player.Sprint.started += ctx => isRunning = false;
-    }
-
-    void Start()
-    {
-
+        inputs.Player.Sprint.canceled += ctx => isRunning = false;
     }
 
     void Update()
     {
         OnMove();
-        //OnSimpleMove();
     }
 
     public void OnMove()
     {
-        Vector3 CameraForward = characterCamera.transform.forward;
-        CameraForward.y = 0f;
-        CameraForward.Normalize();
-
-        if (moveInput != Vector2.zero)
-        {
-
-            Quaternion targetQuaternion = Quaternion.LookRotation(CameraForward);
-            //transform.rotation = targetQuaternion;
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetQuaternion, rotationSpeed* Time.deltaTime);
-
-        }
-
         transform.Rotate(Vector3.up * moveInput.x * rotationSpeed * Time.deltaTime);
+
+        Vector3 cameraForwardDir = characterCamera.transform.forward;
+        cameraForwardDir.y = 0;
+        cameraForwardDir.Normalize();
+
         float currentSpeed = isRunning ? moveSpeed * runMultiplier : moveSpeed;
-        Vector3 moveDir = CameraForward * currentSpeed * moveInput.y;
+        Vector3 moveDir = (transform.forward * moveInput.y) * currentSpeed;
 
         verticalVelocity += Physics.gravity.y * Time.deltaTime;
 
         if (controller.isGrounded && verticalVelocity < 0)
         {
             verticalVelocity = -2f;
-            moveDir.y = verticalVelocity;
         }
+        moveDir.y = verticalVelocity;
 
         if (IsDashing)
         {
-            moveDir = transform.forward * dashForce;
+            moveDir = transform.forward * dashForce * (dashTimer / dashDuration);
             dashTimer -= Time.deltaTime;
 
-            if (dashTimer <= 0)
+            if(dashTimer <= 0)
             {
                 IsDashing = false;
             }
         }
-
         controller.Move(moveDir * Time.deltaTime);
+
     }
 
     private void OnJump(InputAction.CallbackContext context)
@@ -127,20 +108,32 @@ public class ThirdPersonController : MonoBehaviour
         dashTimer = dashDuration;
     }
 
-    private void OnRun(InputAction.CallbackContext context)
-    {
-
-    }
-
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        Rigidbody rb = hit.collider.attachedRigidbody;
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z); // // EDITADO: Empuje más limpio
 
-        if (rb != null && !rb.isKinematic)
+        if (hit.rigidbody != null && !hit.rigidbody.isKinematic)
         {
-            Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
-            rb.AddForce(pushDir * pushForce, ForceMode.Impulse);
+            hit.rigidbody.AddForce(pushDir * pushForce, ForceMode.Impulse);
+        }
+
+        if (hit.gameObject.CompareTag("Enemy"))
+        {
+            Destroy(hit.gameObject);
         }
     }
 
+    private void OnDrawGizmos()
+    {
+        if (controller == null)
+        {
+            return;
+        }
+
+        Gizmos.color = Color.blue;
+        Gizmos.DrawRay(transform.position + Vector3.up, transform.forward * 2f);
+
+        Gizmos.color = verticalVelocity < 0 ? Color.green : Color.magenta;
+        Gizmos.DrawLine(transform.position, transform.position + Vector3.up * verticalVelocity);
+    }
 }
