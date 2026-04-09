@@ -8,7 +8,6 @@ public class EnemyAI : MonoBehaviour
 
     private CharacterController controller;
     private float verticalVelocity;
-    private float gravity = -9.81f;
 
     private void Awake()
     {

@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class Canon : MonoBehaviour
 {
-    public GameObject projectilePrefab;
+    public GameObject projectil;
     public Transform shootPoint;
-    public Vector3 direction = Vector3.forward;
+
     public float force = 20f;
     public float fireRate = 2f;
 
@@ -17,12 +17,21 @@ public class Canon : MonoBehaviour
 
     public void Shoot()
     {
-        GameObject projectile = Instantiate(projectilePrefab, shootPoint.position, Quaternion.identity);
+        if (projectil == null || shootPoint == null) return;
+
+        GameObject projectile = Instantiate(projectil, shootPoint.position, shootPoint.rotation);
         Rigidbody rb = projectile.GetComponent<Rigidbody>();
 
         if(rb != null)
         {
-            rb.AddForce(direction.normalized * force, ForceMode.Impulse);
+            rb.useGravity = false;
+
+            rb.AddForce(transform.right * force, ForceMode.Impulse);
+            Destroy(projectile, 5f);
+        }
+        else
+        {
+            Debug.LogWarning("El Prefab no tine Rigibody");
         }
     }
 
@@ -30,8 +39,10 @@ public class Canon : MonoBehaviour
     {
         Gizmos.color = Color.blue;
 
-        Gizmos.DrawRay(shootPoint.position, direction.normalized * (force * 0.2f));
-        Gizmos.DrawSphere(shootPoint.position + direction.normalized * (force * 0.2f), 0.2f);
+        Vector3 directionForce = transform.right * force * 0.1f;
+
+        Gizmos.DrawRay(shootPoint.position, directionForce);
+        Gizmos.DrawSphere(shootPoint.position + directionForce, 0.2f);
     }
 
 
