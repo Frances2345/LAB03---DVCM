@@ -112,16 +112,11 @@ public class ThirdPersonController : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
 
         if (hit.rigidbody != null && !hit.rigidbody.isKinematic)
         {
+            Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
             hit.rigidbody.AddForce(pushDir * pushForce, ForceMode.Impulse);
-        }
-
-        if (hit.gameObject.CompareTag("Enemy"))
-        {
-            Destroy(hit.gameObject);
         }
     }
 
