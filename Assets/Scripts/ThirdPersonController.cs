@@ -11,7 +11,7 @@ public class ThirdPersonController : MonoBehaviour
     [SerializeField] private Vector2 moveInput;
 
     public float moveSpeed = 20f;
-    public float runMultiplier = 2f;
+    public float runMultiplier = 4f;
     public float rotationSpeed = 200f;
 
     public float gravity = -9.81f;
@@ -43,7 +43,7 @@ public class ThirdPersonController : MonoBehaviour
         inputs.Player.Move.canceled += ctx => moveInput = Vector2.zero;
 
         inputs.Player.Jump.performed += OnJump;
-        inputs.Player.Sprint.performed += OnDash;
+        inputs.Player.Dash.performed += OnDash;
 
         inputs.Player.Sprint.started += ctx => isRunning = true;
         inputs.Player.Sprint.canceled += ctx => isRunning = false;
