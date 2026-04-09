@@ -8,6 +8,7 @@ public class EnemyAI : MonoBehaviour
 
     private CharacterController controller;
     private float verticalVelocity;
+    private float gravity = -9.81f;
 
     private void Awake()
     {
@@ -28,15 +29,18 @@ public class EnemyAI : MonoBehaviour
             moveDir = direction * speed;
             transform.LookAt(new Vector3(player.position.x, transform.position.y, player.position.z));
         }
-             
-    }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
+        if (controller.isGrounded)
         {
-            Destroy(gameObject);
+            verticalVelocity = -2f;
         }
+        else
+        {
+            verticalVelocity += gravity * Time.deltaTime;
+        }
+
+        moveDir.y = verticalVelocity;
+        controller.Move(moveDir * Time.deltaTime);
     }
 
     private void OnDrawGizmos()

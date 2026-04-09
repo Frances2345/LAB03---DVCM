@@ -27,7 +27,7 @@ public class Canon : MonoBehaviour
             rb.useGravity = false;
 
             rb.AddForce(transform.right * force, ForceMode.Impulse);
-            Destroy(projectile, 5f);
+            Destroy(projectile, 3f);
         }
         else
         {

@@ -89,6 +89,8 @@ public class ThirdPersonController : MonoBehaviour
 
     private void OnJump(InputAction.CallbackContext context)
     {
+        if (this == null || controller == null) return;
+
         if (controller.isGrounded)
         {
             verticalVelocity = jumpForce;
@@ -110,7 +112,7 @@ public class ThirdPersonController : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z); // // EDITADO: Empuje más limpio
+        Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
 
         if (hit.rigidbody != null && !hit.rigidbody.isKinematic)
         {
@@ -120,6 +122,21 @@ public class ThirdPersonController : MonoBehaviour
         if (hit.gameObject.CompareTag("Enemy"))
         {
             Destroy(hit.gameObject);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Bullet") || other.CompareTag("Enemy"))
+        {
+            Debug.Log("EL PLAYER HA MUERTO");
+            Destroy(gameObject);
+        }
+
+        if (other.CompareTag("Gold"))
+        {
+            Debug.Log("COMPLETASTE EL JUEGO, FELICIDADES");
+            Destroy(other.gameObject);
         }
     }
 
